@@ -27,6 +27,14 @@ struct Args {
     /// Output file
     #[arg(short, long)]
     output: String,
+
+    /// Pixel character
+    #[arg(short, long, default_value = "█")]
+    pixel: String,
+
+    /// Blank character
+    #[arg(short, long, default_value = " ")]
+    blank: String,
 }
 
 #[derive(Debug, Clone)]
@@ -92,12 +100,12 @@ impl FigletFont {
 
 // const PIXEL_CHAR: char = '█';
 // const PIXEL_CHAR: char = '▚';
-const PIXEL_CHAR: char = '▉';
+// const PIXEL_CHAR: char = '▉';
 // const PIXEL_CHAR: char = '▇'; // 7/8
 
 // const PIXEL_CHAR: char = '■';
 
-const BLANK_CHAR: char = ' ';
+// const BLANK_CHAR: char = ' ';
 
 fn main() -> Result<()> {
     color_eyre::install()?;
@@ -115,6 +123,16 @@ fn main() -> Result<()> {
     if height % 6 != 0 {
         return Err(eyre!("Font file is not a height divisible by 6."));
     }
+
+    let pixel_char = match args.pixel.chars().next() {
+        Some(valid_char) => valid_char,
+        None => return Err(eyre!("Could not use the provided pixel.")),
+    };
+
+    let blank_char = match args.blank.chars().next() {
+        Some(valid_char) => valid_char,
+        None => return Err(eyre!("Could not use the provided blank.")),
+    };
 
     let char_width = width / 16;
     let char_height = height / 6;
@@ -139,9 +157,9 @@ fn main() -> Result<()> {
                     let pixel = image.get_pixel(x, y);
                     let luminance = pixel.to_luma().0[0];
                     if luminance != 0 {
-                        relevant_string.push(PIXEL_CHAR);
+                        relevant_string.push(pixel_char);
                     } else {
-                        relevant_string.push(BLANK_CHAR);
+                        relevant_string.push(blank_char);
                     }
                 }
             }
